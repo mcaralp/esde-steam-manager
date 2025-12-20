@@ -29,15 +29,16 @@
   "devDependencies": {
     "@types/node": "^22.19.1",
     "@vitejs/plugin-vue": "^6.0.2",
+    "dayjs": "^1.11.19",
     "electron": "^39.2.6",
     "electron-builder": "^26.0.12",
     "electron-vite": "^5.0.0",
+    "lucide-vue-next": "^0.559.0",
+    "qrcode": "^1.5.4",
     "typescript": "^5.9.3",
     "vite": "^7.2.6",
     "vue": "^3.5.25",
-    "vue-tsc": "^3.1.6",
-    "dayjs": "^1.11.19",
-    "lucide-vue-next": "^0.559.0",
-    "qrcode": "^1.5.4"
+    "p-cancelable": "^4.0.1",
+    "vue-tsc": "^3.1.6"
   }
 }

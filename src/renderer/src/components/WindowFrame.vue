@@ -21,7 +21,7 @@ const contentStyle = computed(() => ({
         <div class="window">
             <div class="window-inside">
                 <div class="header">
-                    <img src="../assets/steam.svg" alt="Steam Logo" width="32" class="icon" />
+                    <img src="../assets/images/steam.svg" alt="Steam Logo" width="32" class="icon" />
                     <div class="title">{{ title }}</div>
                     <div class="header-action" v-if="$slots['header-action']">
                         <slot name="header-action"></slot>

@@ -7,6 +7,9 @@ import { HomeIcon, SaveIcon } from 'lucide-vue-next'
 import type { GameSearchResult, ESGame } from '../../../shared/types'
 import SpinnerLoading from './SpinnerLoading.vue'
 import dayjs from 'dayjs'
+import { CancelError } from 'p-cancelable'
+import PCancelable from 'p-cancelable'
+import sleep from '../assets/ts/sleep'
 
 const props = defineProps<{ folder: string }>()
 const emit = defineEmits<{goBack: []}>()
@@ -22,6 +25,8 @@ const screenshots = ref<string[]>([])
 const miximages = ref<string[]>([])
 const videos = ref<string[]>([])
 const covers = ref<string[]>([])
+
+let lastPromise : PCancelable<any> | null = null
 
 const currentGame = computed(() =>
 {
@@ -49,26 +54,38 @@ function computeName(game: ESGame): string
     return game.infos.path.replace(regex, '$1')
 }
 
+async function call<T>(promise: Promise<T>): Promise<T>
+{
+    if (lastPromise) lastPromise.cancel()
+    lastPromise = new PCancelable<T>(async (resolve, reject) =>
+    {
+        await promise.then(resolve).catch(reject)
+    })
+    const res = await lastPromise
+    lastPromise = null
+    return res
+}
+
 // Load suggestions based on game path
 async function loadData()
 {
     loading.value = true
     try 
     {    
-        games.value = await window.api.getESGames(props.folder)
-        await new Promise(resolve => setTimeout(resolve, 200)) // Allow UI to update
+        games.value = await call(window.api.getESGames(props.folder))
+        await call(sleep(100))
         if (currentGame.value.metadata.steamid !== 0)
         {
             await loadGameAssets(currentGame.value.metadata.steamid)
         }
         else
         {
-            suggestions.value = await window.api.searchGames(computeName(currentGame.value))
+            suggestions.value = await call(window.api.searchGames(computeName(currentGame.value)))
         }
     }
     catch (err)
     {
-        await new Promise(resolve => setTimeout(resolve, 200)) // Allow UI to update
+        if(err instanceof CancelError) return
         games.value = []
     }
     loading.value = false
@@ -76,15 +93,22 @@ async function loadData()
 
 async function selectSteamId(result: GameSearchResult)
 {
-    loading.value = true
-    await new Promise(resolve => setTimeout(resolve, 200)) // Allow UI to update
-    await loadGameAssets(result.appId)
+    try
+    {
+        loading.value = true
+        await call(sleep(100))
+        await loadGameAssets(result.appId)
+    }
+    catch (e)
+    {
+        if(e instanceof CancelError) return
+    }
     loading.value = false
 }
 
 async function loadGameAssets(appId: number)
 {
-    const gameInfo = await window.api.getGameInfo(appId)
+    const gameInfo = await call(window.api.getGameInfo(appId))
     
     currentGame.value.infos.desc = gameInfo.short_description
     currentGame.value.infos.name = gameInfo.common.name
@@ -119,7 +143,7 @@ async function synchronize()
     
     try
     {
-        await new Promise(resolve => setTimeout(resolve, 200)) // Allow UI to update
+        await new Promise(resolve => setTimeout(resolve, 100)) // Allow UI to update
         await window.api.setESGame(props.folder, JSON.parse(JSON.stringify(currentGame.value)))
     }
     finally

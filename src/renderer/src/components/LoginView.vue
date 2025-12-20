@@ -5,6 +5,7 @@ import WindowFrame from './WindowFrame.vue'
 import SpinnerLoading from './SpinnerLoading.vue'
 import { LogOutIcon, RotateCwIcon, FolderIcon, FolderPlusIcon } from 'lucide-vue-next'
 import type { UserInfo, QrEvent } from '../../../shared/types'
+import sleep from '../assets/ts/sleep'
 
 const userInfo = ref<UserInfo | null>(null)
 const qrCodeUrl = ref<string | null>(null)
@@ -24,7 +25,7 @@ async function checkUserInfo()
     {
         userInfo.value = await window.api.getUserInfo()
         // Small delay to show loading state
-        await new Promise(resolve => setTimeout(resolve, 500)) 
+        await sleep(300)
         generalState.value = 'connected'
     }
     catch (err: any)

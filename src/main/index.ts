@@ -8,11 +8,11 @@ import { getESGames, setESGame } from './es-games'
 
 function createWindow(): electron.BrowserWindow
 {
-    // const { width, height } = electron.screen.getPrimaryDisplay().workAreaSize
+    const { width, height } = electron.screen.getPrimaryDisplay().workAreaSize
     const mainWindow = new electron.BrowserWindow(
     {
-        width: 700,
-        height: 700,
+        width: width,
+        height: height,
         autoHideMenuBar: true,
         ...(process.platform === 'linux' ? { icon } : {}),
         webPreferences:
@@ -21,7 +21,7 @@ function createWindow(): electron.BrowserWindow
         }
     })
 
-    // mainWindow.webContents.openDevTools()
+    mainWindow.webContents.openDevTools()
 
     // HMR for renderer base on electron-vite cli.
     // Load the remote URL for development or the local html file for production.

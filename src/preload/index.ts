@@ -35,6 +35,11 @@ const api =
         return ipcRenderer.invoke('es:get-games', folderPath)
     },
 
+    setESGame(folderPath: string, game: ESGame): Promise<void>
+    {
+        return ipcRenderer.invoke('es:set-game', folderPath, game)
+    },
+
     addESFolder (): Promise<string>
     {
         return ipcRenderer.invoke('es:add-folder')

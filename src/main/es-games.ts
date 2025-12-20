@@ -25,12 +25,13 @@ export async function getESGames(folder: string): Promise<Array<ESGame>>
         const metadata = getSteamMetadataOfGame(steamMetadata, gamePath)
         games.push({infos, metadata})
     }
+
     return games
 }
 
 
-export async function setESGames(folder: string, games: Array<ESGame>): Promise<void>
+export async function setESGame(folder: string, game: ESGame): Promise<void>
 {
-    await setGameInfos(folder, games.map((g) => g.infos))
-    await setSteamMetadata(folder, games.map((g) => g.metadata))
+    await setGameInfos(folder, game.infos)
+    await setSteamMetadata(folder, game.metadata)
 }

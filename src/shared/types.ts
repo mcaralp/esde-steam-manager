@@ -22,6 +22,7 @@ export interface ESGameSteamMetadata
     screenshot: string
     video: string
     cover: string
+    miximage: string
 }
 
 export interface ESGameInfos
@@ -34,7 +35,7 @@ export interface ESGameInfos
     developer: string
     publisher: string
     genre: string
-    players: number
+    players: string
 }
 
 export interface ESGame

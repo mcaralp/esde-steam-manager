@@ -6,6 +6,7 @@ export interface SteamAPI
     searchGames: (gameName: string) => Promise<Array<GameSearchResult>>
     getGameInfo: (appId: number) => Promise<any>
     getESGames: (folderPath: string) => Promise<Array<ESGame>>
+    setESGame: (folderPath: string, game: ESGame) => Promise<void>
     addESFolder: () => Promise<string>
     getESFolders: () => Promise<Array<string>>
 }

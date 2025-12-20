@@ -4,7 +4,7 @@ import icon from '../../resources/icon.png?asset'
 import SteamService from './steam-service'
 import ESFolders from './es-folders'
 import { Mutex } from 'async-mutex'
-import { getESGames } from './es-games'
+import { getESGames, setESGame } from './es-games'
 
 function createWindow(): electron.BrowserWindow
 {
@@ -119,6 +119,22 @@ function setupIPCHandlers(window: electron.BrowserWindow, steamService: SteamSer
             }
         })
     })
+
+    electron.ipcMain.handle('es:set-game', (_event, folderPath: string, game: any) =>
+    {
+        return mutex.runExclusive(async () => {
+            try
+            {
+                return await setESGame(folderPath, game)
+            }
+            catch (error: any)
+            {
+                console.error('Error setting ES infos:', error)
+                throw new Error(error.message)
+            }
+        })
+    })
+
     
     electron.ipcMain.handle('es:get-games', (_event, folderPath: string) =>
     {

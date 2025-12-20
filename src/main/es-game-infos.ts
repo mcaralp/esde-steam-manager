@@ -18,7 +18,7 @@ function createDefaultGameInfos(gamePath: string): ESGameInfos
         developer: '',
         publisher: '',
         genre: '',
-        players: 0
+        players: ''
     }
 }
 
@@ -75,7 +75,7 @@ export async function getGameInfos(folder: string): Promise<Array<ESGameInfos>>
     }
 }
 
-export async function setGameInfos(folder: string, games: Array<ESGameInfos>): Promise<void>
+export async function setGameInfos(folder: string, game: ESGameInfos): Promise<void>
 {
     let xml = await getGameInfosXml(folder)
 
@@ -91,23 +91,27 @@ export async function setGameInfos(folder: string, games: Array<ESGameInfos>): P
 
     if(!isXmlArray(xml.gameList.game))
     {
-        xml.gameList.game = []
-    }
-    
-    for(const game of games)
-    {
-        const i = xml.gameList.game.findIndex((g: any) => g.path === game.path)
-        if(i !== -1)
+        if(isXmlObject(xml.gameList.game))
         {
-            Object.assign(xml.gameList.game[i], game)
+            xml.gameList.game = [xml.gameList.game]
         }
         else
         {
-            xml.gameList.game.push(game)
+            xml.gameList.game = []
         }
     }
+    
+    const i = xml.gameList.game.findIndex((g: any) => g.path === game.path)
+    if(i !== -1)
+    {
+        Object.assign(xml.gameList.game[i], game)
+    }
+    else
+    {
+        xml.gameList.game.push(game)
+    }
 
-    const builder = new XMLBuilder()
+    const builder = new XMLBuilder({ format: true, indentBy: "  " })
     const xmlContent = builder.build(xml)
     const file = path.join(folder, gamelistPath)
     await fs.writeFile(file, xmlContent, 'utf-8')

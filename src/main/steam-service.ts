@@ -3,7 +3,7 @@ import SteamUser from 'steam-user'
 import axios from 'axios'
 import { LoginSession, EAuthTokenPlatformType } from 'steam-session'
 import { GameSearchResult, UserInfo, QrEventCallback } from '../shared/types'
-import { resolve } from 'path/win32'
+import fs from 'fs'
 
 interface SteamConfig
 {
@@ -203,6 +203,9 @@ export default class SteamService
             reviews_summary: appReviews.data.query_summary,
             review: appReviews.data.reviews
         }
+
+        const file = 'steam_app_' + appId + '.json'
+        fs.writeFileSync(file, JSON.stringify(combinedInfo, null, 4))
 
         this.gameInfosCache[appId] = combinedInfo
         return combinedInfo

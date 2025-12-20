@@ -12,6 +12,10 @@ files:
 asarUnpack:
     - resources/**
 win:
+    target:
+    - target: zip
+      arch:
+        - x64
     executableName: electron-app
 nsis:
     artifactName: ${name}-${version}-setup.${ext}

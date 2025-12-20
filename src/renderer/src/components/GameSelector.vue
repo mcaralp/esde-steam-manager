@@ -8,12 +8,8 @@ interface Props
 }
 
 const props = defineProps<Props>()
-
 const currentIndex = defineModel<number>({ default: 0 })
-
-const emit = defineEmits<{
-    change: [index: number]
-}>()
+const emit = defineEmits<{change: [index: number]}>()
 
 const currentGameName = computed(() => props.gameNames[currentIndex.value] || 'Unnamed Game')
 

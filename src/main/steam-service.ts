@@ -3,7 +3,6 @@ import SteamUser from 'steam-user'
 import axios from 'axios'
 import { LoginSession, EAuthTokenPlatformType } from 'steam-session'
 import { GameSearchResult, UserInfo, QrEventCallback } from '../shared/types'
-import fs from 'fs'
 
 interface SteamConfig
 {

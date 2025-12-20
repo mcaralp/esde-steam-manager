@@ -3,6 +3,7 @@ productName: electron-app
 directories:
     buildResources: build
 files:
+    - '!Emulation'
     - '!**/.vscode/*'
     - '!src/*'
     - '!electron.vite.config.{js,ts,mjs,cjs}'

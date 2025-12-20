@@ -4,7 +4,7 @@ import WindowFrame from './WindowFrame.vue'
 import GameSelector from './GameSelector.vue'
 import AssetViewer from './AssetViewer.vue'
 import { HomeIcon, SaveIcon } from 'lucide-vue-next'
-import type { GameSearchResult, ESGame } from '../../../shared/types'
+import { GameSearchResult, ESGame } from '../../../shared/types'
 import SpinnerLoading from './SpinnerLoading.vue'
 import dayjs from 'dayjs'
 import { CancelError } from 'p-cancelable'
@@ -122,18 +122,38 @@ async function loadGameAssets(appId: number)
     const assets = gameInfo.common.library_assets_full
     const base = 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/'
 
-    covers.value = Object.values(assets.library_capsule.image).map(c => base + appId + '/' + c)
-    marquees.value = Object.values(assets.library_logo.image).map(m => base + appId + '/' + m)
-    miximages.value = Object.values(assets.library_header.image).map(m => base + appId + '/' + m)
+    const capsules = assets.library_capsule?.image ?? {}
+    const logos = assets.library_logo?.image ?? {}
+    const headers = assets.library_header?.image ?? {}
+
+    covers.value = Object.values(capsules).map(c => base + appId + '/' + c)
+    marquees.value = Object.values(logos).map(m => base + appId + '/' + m)
+    miximages.value = Object.values(headers).map(m => base + appId + '/' + m)
     screenshots.value = gameInfo.screenshots?.map((s: any) => s.path_full)
     videos.value = gameInfo.movies?.map((m: any) => `https://video.fastly.steamstatic.com/store_trailers/${m.id}/movie480.mp4`)
 
+    if(covers.value.length === 0 && gameInfo.capsule_image)
+    {
+        covers.value.push(gameInfo.capsule_image)
+    }
+
+    if(miximages.value.length === 0 && gameInfo.header_image)
+    {
+        miximages.value.push(gameInfo.header_image)
+    }
+
     currentGame.value.metadata.steamid = appId
-    if(covers.value.indexOf(currentGame.value.metadata.cover) === -1) currentGame.value.metadata.cover = covers.value[0]
-    if(marquees.value.indexOf(currentGame.value.metadata.marquee) === -1) currentGame.value.metadata.marquee = marquees.value[0]
-    if(miximages.value.indexOf(currentGame.value.metadata.miximage) === -1) currentGame.value.metadata.miximage = miximages.value[0]
-    if(screenshots.value.indexOf(currentGame.value.metadata.screenshot) === -1) currentGame.value.metadata.screenshot = screenshots.value[0]
-    if(videos.value.indexOf(currentGame.value.metadata.video) === -1) currentGame.value.metadata.video = videos.value[0]
+
+    if(covers.value.length === 0) currentGame.value.metadata.cover = ''
+    else if(covers.value.indexOf(currentGame.value.metadata.cover) === -1) currentGame.value.metadata.cover = covers.value[0]
+    if(marquees.value.length === 0) currentGame.value.metadata.marquee = ''
+    else if(marquees.value.indexOf(currentGame.value.metadata.marquee) === -1) currentGame.value.metadata.marquee = marquees.value[0]
+    if(miximages.value.length === 0) currentGame.value.metadata.miximage = ''
+    else if(miximages.value.indexOf(currentGame.value.metadata.miximage) === -1) currentGame.value.metadata.miximage = miximages.value[0]
+    if(screenshots.value.length === 0) currentGame.value.metadata.screenshot = ''
+    else if(screenshots.value.indexOf(currentGame.value.metadata.screenshot) === -1) currentGame.value.metadata.screenshot = screenshots.value[0]
+    if(videos.value.length === 0) currentGame.value.metadata.video = ''
+    else if(videos.value.indexOf(currentGame.value.metadata.video) === -1) currentGame.value.metadata.video = videos.value[0]
 }
 
 async function synchronize()

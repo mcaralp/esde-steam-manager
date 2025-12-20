@@ -114,7 +114,7 @@ function nextAsset()
         </div>
 
         <!-- Asset Counter -->
-        <div class="asset-counter">
+        <div class="asset-counter" v-if="assets.length > 0">
             {{ currentIndex + 1 }} / {{ assets.length }}
         </div>
     </div>

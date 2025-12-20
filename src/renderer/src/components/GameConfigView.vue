@@ -4,7 +4,7 @@ import WindowFrame from './WindowFrame.vue'
 import GameSelector from './GameSelector.vue'
 import AssetViewer from './AssetViewer.vue'
 import { HomeIcon, SaveIcon } from 'lucide-vue-next'
-import type { GameSearchResult, ESGameSteamMetadata, ESGame } from '../../../shared/types'
+import type { GameSearchResult, ESGame } from '../../../shared/types'
 import SpinnerLoading from './SpinnerLoading.vue'
 import dayjs from 'dayjs'
 
@@ -13,6 +13,7 @@ const emit = defineEmits<{goBack: []}>()
 
 const games = ref<ESGame[]>([])
 const loading = ref(true)
+const syncingPaths = ref<Set<string>>(new Set())
 
 const currentGameIndex = ref(0)
 const suggestions = ref<GameSearchResult[]>([])
@@ -30,6 +31,12 @@ const currentGame = computed(() =>
 const gameNames = computed(() =>
 {
     return games.value.map(computeName)
+})
+
+const isSyncing = computed(() =>
+{
+    if (!currentGame.value) return false
+    return syncingPaths.value.has(currentGame.value.infos.path)
 })
 
 function computeName(game: ESGame): string
@@ -107,7 +114,18 @@ async function loadGameAssets(appId: number)
 
 async function synchronize()
 {
-    await window.api.setESGame(props.folder, JSON.parse(JSON.stringify(currentGame.value)))
+    const gamePath = currentGame.value.infos.path
+    syncingPaths.value.add(gamePath)
+    
+    try
+    {
+        await new Promise(resolve => setTimeout(resolve, 200)) // Allow UI to update
+        await window.api.setESGame(props.folder, JSON.parse(JSON.stringify(currentGame.value)))
+    }
+    finally
+    {
+        syncingPaths.value.delete(gamePath)
+    }
 }
 
 function goBack()
@@ -135,7 +153,7 @@ onMounted(async () =>
         <SpinnerLoading :size="40" :color="'#888'"/>
 
         <template #footer v-if="currentGame?.metadata?.steamid !== 0">
-            <button @click="synchronize" class="save-bottom-btn">
+            <button class="save-bottom-btn" disabled>
                 <SaveIcon :size="18" :stroke-width="2" />
                 Save Changes
             </button>
@@ -248,9 +266,10 @@ onMounted(async () =>
             </div>
         </div>
         <template #footer>
-            <button @click="synchronize" class="save-bottom-btn">
-                <SaveIcon :size="18" :stroke-width="2" />
-                Save Changes
+            <button @click="synchronize" class="save-bottom-btn" :disabled="isSyncing">
+                <SpinnerLoading v-if="isSyncing" :size="18" :color="'#fff'" />
+                <SaveIcon v-else :size="18" :stroke-width="2" />
+                {{ isSyncing ? 'Saving...' : 'Save Changes' }}
             </button>
         </template>
     </WindowFrame>
@@ -381,7 +400,7 @@ onMounted(async () =>
 
 .save-bottom-btn
 {
-    padding: 0.75rem 2rem;
+    padding: 0.75rem 0;
     background-color: #4a4a4a;
     color: #fff;
     border: 1px solid #4a4a4a;
@@ -394,6 +413,8 @@ onMounted(async () =>
     align-items: center;
     gap: 0.5rem;
     transition: all 0.2s ease;
+    width: 200px;
+    justify-content: center;
 }
 
 .save-bottom-btn:hover
@@ -405,6 +426,12 @@ onMounted(async () =>
 .save-bottom-btn:active
 {
     transform: scale(0.98);
+}
+
+.save-bottom-btn:disabled
+{
+    opacity: 0.6;
+    cursor: not-allowed;
 }
 
 .empty-state

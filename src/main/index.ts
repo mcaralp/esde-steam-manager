@@ -8,12 +8,11 @@ import { getESGames, setESGame } from './es-games'
 
 function createWindow(): electron.BrowserWindow
 {
-
-    const { width, height } = electron.screen.getPrimaryDisplay().workAreaSize
+    // const { width, height } = electron.screen.getPrimaryDisplay().workAreaSize
     const mainWindow = new electron.BrowserWindow(
     {
-        width: width,
-        height: height,
+        width: 700,
+        height: 700,
         autoHideMenuBar: true,
         ...(process.platform === 'linux' ? { icon } : {}),
         webPreferences:
@@ -22,7 +21,7 @@ function createWindow(): electron.BrowserWindow
         }
     })
 
-    mainWindow.webContents.openDevTools()
+    // mainWindow.webContents.openDevTools()
 
     // HMR for renderer base on electron-vite cli.
     // Load the remote URL for development or the local html file for production.
@@ -136,34 +135,30 @@ function setupIPCHandlers(window: electron.BrowserWindow, steamService: SteamSer
     })
 
     
-    electron.ipcMain.handle('es:get-games', (_event, folderPath: string) =>
+    electron.ipcMain.handle('es:get-games', async (_event, folderPath: string) =>
     {
-        return mutex.runExclusive(async () => {
-            try
-            {
-                return await getESGames(folderPath)
-            }
-            catch (error: any)
-            {
-                console.error('Error getting ES infos:', error)
-                throw new Error(error.message)
-            }
-        })
+        try
+        {
+            return await getESGames(folderPath)
+        }
+        catch (error: any)
+        {
+            console.error('Error getting ES infos:', error)
+            throw new Error(error.message)
+        }
     })
 
     electron.ipcMain.handle('es:get-folders', () =>
     {
-        return mutex.runExclusive(() => {
-            try
-            {
-                return esFolders.getFolders()
-            }
-            catch (error: any)
-            {
-                console.error('Error getting folders:', error)
-                throw new Error(error.message)
-            }
-        })
+        try
+        {
+            return esFolders.getFolders()
+        }
+        catch (error: any)
+        {
+            console.error('Error getting folders:', error)
+            throw new Error(error.message)
+        }
     })
 
     electron.ipcMain.handle('es:add-folder', () =>
